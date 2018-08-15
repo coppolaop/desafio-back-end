@@ -8,8 +8,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.XML;
+
+import br.com.infoglobo.htmlToJson.HtmlToJson;
 
 /**
  * Hello world!
@@ -17,7 +20,11 @@ import org.json.XML;
  */
 public class App 
 {   
-    public static void main( String[] args )
+	static final String FILE_DIRECTORY = "C:\\Users\\Public\\Documents\\";
+    static final String FILE_PATH = FILE_DIRECTORY + "autoesporte.json";
+    static final String LINK = "https://revistaautoesporte.globo.com/rss/ultimas/feed.xml";
+	
+	public static void main( String[] args )
     {
     	InputStream is = null;
         BufferedReader br;
@@ -27,7 +34,7 @@ public class App
         
     	try {
     		System.out.println("Fazendo download do aquivo XML");
-			URL url = new URL("https://revistaautoesporte.globo.com/rss/ultimas/feed.xml");
+			URL url = new URL(LINK);
 			is = url.openStream();
 	        br = new BufferedReader(new InputStreamReader(is));
 	        
@@ -38,11 +45,23 @@ public class App
 	        
 	        System.out.println("Convertendo arquivo para JSON");
 	        JSONObject xmlJSONObj = XML.toJSONObject(xmlFile.toString());
-            String jsonPrettyPrintString = xmlJSONObj.toString(4);
+            
+	        JSONArray list = xmlJSONObj.getJSONObject("rss").getJSONObject("channel").getJSONArray("item");
+	        HtmlToJson converter = new HtmlToJson();
+	        String html = "";
+	        
+	        for(int i = 0; i < list.length(); i++) {
+	        	html = converter.convert(list.getJSONObject(i).getString("description"));
+	        	list.getJSONObject(i).put("description", html);
+	        }
+	        
+	        
+	        String jsonPrettyPrintString = xmlJSONObj.toString(4);
             jsonFile.append(jsonPrettyPrintString);
             
+            
             System.out.println("Gravando arquivo");
-            writeToFile("C:\\Users\\Public\\Documents\\test.json",jsonFile);
+            writeToFile(FILE_PATH, jsonFile);
 			System.out.println("Arquivo gravado com Sucesso");
 			
 		} catch (Exception ex) {
