@@ -45,16 +45,16 @@ public class App
 	        
 	        System.out.println("Convertendo arquivo para JSON");
 	        JSONObject xmlJSONObj = XML.toJSONObject(xmlFile.toString());
-            
+	        
 	        JSONArray list = xmlJSONObj.getJSONObject("rss").getJSONObject("channel").getJSONArray("item");
 	        HtmlToJson converter = new HtmlToJson();
-	        String html = "";
+	        JSONArray node = new JSONArray();
 	        
 	        for(int i = 0; i < list.length(); i++) {
-	        	html = converter.convert(list.getJSONObject(i).getString("description"));
-	        	list.getJSONObject(i).put("description", html);
+	        	node = converter.convert(list.getJSONObject(i).getString("description"));
+	        	
+	        	list.getJSONObject(i).put("description", node);
 	        }
-	        
 	        
 	        String jsonPrettyPrintString = xmlJSONObj.toString(4);
             jsonFile.append(jsonPrettyPrintString);
